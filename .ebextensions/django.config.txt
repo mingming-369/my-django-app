@@ -1,0 +1,9 @@
+option_settings:
+  aws:elasticbeanstalk:container:python:
+    WSGIPath: insurance_project.wsgi:application
+  aws:elasticbeanstalk:environment:proxy:staticfiles:
+    /static: staticfiles
+
+container_commands:
+  01_collectstatic:
+    command: "python manage.py collectstatic --noinput"

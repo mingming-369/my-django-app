@@ -1,0 +1,120 @@
+{% extends 'insurance_app/base.html' %}
+
+{% block title %}Add New Customer{% endblock %}
+
+{% block page_title %}Add a New Customer{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+    <h2 class="text-3xl font-bold mb-6 text-gray-800 text-center">Customer Information</h2>
+        
+        <form action="{% url 'add_customer' %}" method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <div>
+                <label for="id_customer" class="block text-sm font-medium text-gray-700">Customer ID</label>
+                <input type="text" id="id_customer" name="id_customer" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div>
+                <label for="customer_name" class="block text-sm font-medium text-gray-700">Customer Name</label>
+                <input type="text" id="customer_name" name="customer_name" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div>
+                <label for="in_charge_person" class="block text-sm font-medium text-gray-700">In Charge By</label>
+                <select id="in_charge_person" name="in_charge_person" 
+                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">-- Select Person --</option>
+                    {% for value, name in in_charge_choices %}
+                        <option value="{{ value }}">{{ name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="text" id="in_charge_other" name="in_charge_other" placeholder="Enter Name" class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 hidden">
+            </div>
+
+            <div>
+                <label for="proposal_prepared_by" class="block text-sm font-medium text-gray-700">Proposal Prepared By</label>
+                <select id="proposal_prepared_by" name="proposal_prepared_by" 
+                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">-- Select Person --</option>
+                    {% for value, name in proposal_choices %}
+                        <option value="{{ value }}">{{ name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="text" id="proposal_other" name="proposal_other" placeholder="Enter Name" class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 hidden">
+            </div>
+
+            <div>
+                <label for="engineers" class="block text-sm font-medium text-gray-700">Engineers (Hold Ctrl to select multiple)</label>
+                <select id="engineers" name="engineers" multiple
+                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-32">
+                    {% for value, name in engineer_choices %}
+                        <option value="{{ value }}">{{ name }}</option>
+                    {% endfor %}
+                </select>
+                <label for="engineers_other" class="block text-sm font-medium text-gray-700 mt-2">Other Engineers (Optional, comma separated)</label>
+                <input type="text" id="engineers_other" name="engineers_other" placeholder="e.g. John Doe, Jane Smith" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div>
+                <label for="installer" class="block text-sm font-medium text-gray-700">Installer (Optional)</label>
+                <input type="text" id="installer" name="installer" placeholder="Enter Installer Name" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div>
+                <label for="installed_on" class="block text-sm font-medium text-gray-700">Installed On</label>
+                <input type="date" id="installed_on" name="installed_on" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div>
+                <label for="address" class="block text-sm font-medium text-gray-700">Address(Optional)</label>
+                <input type="text" id="address" name="address" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">Email(Optional)</label>
+                <input type="email" id="email" name="email" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div>
+                <label for="phone_num" class="block text-sm font-medium text-gray-700">Phone Number(Optional)</label>
+                <input type="text" id="phone_num" name="phone_num" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div class="flex items-center justify-between pt-4">
+                <a href="{% url 'main_page' %}" class="text-gray-600 hover:text-gray-800 font-medium">
+                    &larr; Back to Main Page
+                </a>
+                <button type="submit" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-blue-700 transition-transform transform hover:scale-105 duration-300">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function toggleOtherInput(selectId, inputId) {
+            const selectElement = document.getElementById(selectId);
+            const inputElement = document.getElementById(inputId);
+
+            if (selectElement && inputElement) {
+                selectElement.addEventListener('change', function() {
+                    if (this.value === 'Other') {
+                        inputElement.classList.remove('hidden');
+                        inputElement.required = true;
+                    } else {
+                        inputElement.classList.add('hidden');
+                        inputElement.required = false;
+                        inputElement.value = '';
+                    }
+                });
+            }
+        }
+
+        toggleOtherInput('in_charge_person', 'in_charge_other');
+        toggleOtherInput('proposal_prepared_by', 'proposal_other');
+    });
+</script>
+{% endblock %}

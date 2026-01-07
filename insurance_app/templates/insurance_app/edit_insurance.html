@@ -1,0 +1,95 @@
+{% extends 'insurance_app/base.html' %}
+
+{% block title %}Edit Insurance Policy{% endblock %}
+
+{% block page_title %}Edit Insurance{% endblock %}
+
+{% block content %}
+<div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-4">Edit Insurance Policy</h1>
+    <h2 class="text-xl text-gray-600 mb-2">Policy: <span class="font-mono">{{ insurance.no_insurance }}</span></h2>
+    <p class="text-gray-500 mb-6">Customer: {{ insurance.id_customer.customer_name }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="space-y-4">
+            <div>
+                <label for="ins_co" class="block text-sm font-medium text-gray-700">Insurance Company</label>
+                <input type="text" name="ins_co" id="ins_co" value="{{ insurance.ins_co }}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+            </div>
+            <div>
+                <label for="sum_amount" class="block text-sm font-medium text-gray-700">Sum Amount</label>
+                <input type="number" step="0.01" name="sum_amount" id="sum_amount" value="{{ insurance.sum_amount }}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+            </div>
+            <div>
+                <label for="total_payable" class="block text-sm font-medium text-gray-700">Total Payable</label>
+                <input type="number" step="0.01" name="total_payable" id="total_payable" value="{{ insurance.total_payable }}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="starting_period" class="block text-sm font-medium text-gray-700">Start Date</label>
+                    <input type="date" name="starting_period" id="starting_period" value="{{ insurance.starting_period|date:'Y-m-d' }}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+
+                <div>
+                    <label for="duration" class="block text-sm font-medium text-gray-700">Duration</label>
+                    <select id="duration" name="duration" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <option value="1">1 Year</option>
+                        <option value="2">2 Years</option>
+                        <option value="3">3 Years</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label for="end_period" class="block text-sm font-medium text-gray-700">End Date (Auto-calculated)</label>
+                <input type="date" name="end_period" id="end_period" value="{{ insurance.end_period|date:'Y-m-d' }}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-gray-200" readonly required>
+            </div>
+            
+            <div>
+                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                <input type="text" name="status" id="status" value="{{ insurance.status }}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+            </div>
+        </div>
+
+        <div class="mt-8 flex justify-end items-center border-t pt-6 space-x-4">
+            <a href="{% url 'customer_detail' insurance.id_customer.id_customer %}" class="bg-gray-200 text-gray-700 font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-gray-300 transition-colors">Cancel</a>
+            <button type="submit" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const startDateInput = document.getElementById('starting_period');
+        const durationSelect = document.getElementById('duration');
+        const endDateInput = document.getElementById('end_period');
+
+        function calculateEndDate() {
+            const startDateValue = startDateInput.value;
+            const durationYears = parseInt(durationSelect.value, 10);
+            
+            if (startDateValue && !isNaN(durationYears)) {
+                const startDate = new Date(startDateValue);
+                const endDate = new Date(startDate.getTime());
+ 
+                endDate.setFullYear(startDate.getFullYear() + durationYears);
+                endDate.setDate(startDate.getDate() - 1);
+
+                const year = endDate.getFullYear();
+                const month = String(endDate.getMonth() + 1).padStart(2, '0');
+                const day = String(endDate.getDate()).padStart(2, '0');
+                
+                endDateInput.value = `${year}-${month}-${day}`;
+            }
+        }
+
+        startDateInput.addEventListener('change', calculateEndDate);
+        durationSelect.addEventListener('change', calculateEndDate);
+
+    });
+</script>
+{% endblock %}

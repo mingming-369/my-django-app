@@ -1,0 +1,102 @@
+{% extends 'insurance_app/base.html' %}
+
+{% block title %}Add Warranty{% endblock %}
+
+{% block page_title %}Add Warranty{% endblock %}
+
+{% block content %}
+<div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-lg mx-auto">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Add Warranty for {{ customer.customer_name }}</h1>
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+
+        <div>
+            <label for="product_select" class="block text-gray-700 font-semibold mb-2">Product Name</label>
+            <select name="product_select" id="product_select" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="" disabled selected>-- Select an item --</option>
+                <option value="Inverter">Inverter</option>
+                <option value="String Inverter">String Inverter</option>
+                <option value="Hybrid Inverter">Hybrid Inverter</option>
+                <option value="Battery-based Inverter">Battery-based Inverter</option>
+                <option value="Micro Inverter">Micro Inverter</option>
+                <option value="Central Optimiser">Central Optimiser</option>
+                <option value="Central Inverter">Central Inverter</option>
+                <option value="other">Other...</option>
+            </select>
+        </div>
+
+        <div id="other_product_div" class="hidden">
+            <label for="product_other_input" class="block text-gray-700 font-semibold mb-2">Please specify other item:</label>
+            <input type="text" name="product_other" id="product_other_input" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="start_date" class="block text-gray-700 font-semibold mb-2">Start Date</label>
+                <input type="date" name="start_date" id="start_date" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label for="duration" class="block text-gray-700 font-semibold mb-2">Duration</label>
+                <select name="duration" id="duration" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="1">1 Year</option>
+                    <option value="2">2 Years</option>
+                    <option value="3" selected>3 Years</option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <label for="end_date" class="block text-gray-700 font-semibold mb-2">End Date</label>
+            <input type="date" name="end_date" id="end_date" required class="w-full px-4 py-2 border rounded-lg bg-gray-200 text-gray-500" readonly>
+        </div>
+        <div>
+            <label for="details" class="block text-gray-700 font-semibold mb-2">Details (Optional)</label>
+            <textarea name="details" id="details" rows="4" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+        
+        <div class="flex justify-end items-center pt-4 space-x-4">
+            <a href="{% url 'customer_detail' customer.id_customer %}" class="bg-gray-200 text-gray-700 font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-gray-300 transition-colors">Cancel</a>
+            <button type="submit" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-blue-700">Save Warranty</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const startDateInput = document.getElementById('start_date');
+        const durationSelect = document.getElementById('duration');
+        const endDateInput = document.getElementById('end_date');
+        function calculateEndDate() {
+            const startDateValue = startDateInput.value;
+            const durationYears = parseInt(durationSelect.value, 10);
+            if (startDateValue && !isNaN(durationYears)) {
+                const startDate = new Date(startDateValue);
+                const endDate = new Date(startDate.getTime());
+                endDate.setFullYear(startDate.getFullYear() + durationYears);
+                endDate.setDate(startDate.getDate() - 1);
+                const year = endDate.getFullYear();
+                const month = String(endDate.getMonth() + 1).padStart(2, '0');
+                const day = String(endDate.getDate()).padStart(2, '0');
+                endDateInput.value = `${year}-${month}-${day}`;
+            }
+        }
+        startDateInput.addEventListener('change', calculateEndDate);
+        durationSelect.addEventListener('change', calculateEndDate);
+        calculateEndDate();
+
+        const productSelect = document.getElementById('product_select');
+        const otherProductDiv = document.getElementById('other_product_div');
+        const otherProductInput = document.getElementById('product_other_input');
+
+        productSelect.addEventListener('change', function() {
+            if (productSelect.value === 'other') {
+                otherProductDiv.classList.remove('hidden');
+                otherProductInput.required = true;
+            } else {
+                otherProductDiv.classList.add('hidden');
+                otherProductInput.required = false;
+                otherProductInput.value = '';
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'insurance_app/base.html' %}
+{% load static %}
+
+{% block title %}Annual Renewals{% endblock %}
+
+{% block page_title %}Annual Insurance Renewals{% endblock %}
+
+{% block content %}
+<div class="container mx-auto max-w-5xl">
+
+    <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Annual Insurance Renewals</h2>
+        <p class="text-gray-600 mb-1">The policies below have passed their annual renewal date. Please review and update the policy, if done then check "Mark as Complete".</p>
+        <p class="text-gray-600 mb-6">The policy will re-appear here next year when its next renewal date has passed.</p>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="py-2 px-3 border-b text-left text-sm font-semibold text-gray-600">Customer</th>
+                        <th class="py-2 px-3 border-b text-left text-sm font-semibold text-gray-600">Policy</th>
+                        <th class="py-2 px-3 border-b text-left text-sm font-semibold text-gray-600">Renewal Due Date</th>
+                        <th class="py-2 px-3 border-b text-left text-sm font-semibold text-gray-600">Final End Date</th>
+                        <th class="py-2 px-3 border-b text-center text-sm font-semibold text-gray-600">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% if renewal_notices %}
+                        {% for notice in renewal_notices %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-3 px-3 border-b">
+                                <a href="{% url 'customer_detail' notice.insurance.id_customer.id_customer %}" class="text-blue-600 hover:underline font-medium">
+                                    {{ notice.insurance.id_customer.customer_name }}
+                                </a>
+                            </td>
+                            <td class="py-3 px-3 border-b">{{ notice.insurance.no_insurance }}</td>
+                            <td class="py-3 px-3 border-b font-medium text-red-600">{{ notice.due_date|date:"F d, Y" }} (for {{ notice.renewal_year }})</td>
+                            <td class="py-3 px-3 border-b">{{ notice.insurance.end_period|date:"F d, Y" }}</td>
+                            <td class="py-3 px-3 border-b text-center">
+                                <!-- This is the checkbox form -->
+                                <form action="{% url 'dismiss_renewal' notice.pk %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit" class="bg-green-500 text-white text-xs font-semibold py-2 px-3 rounded-lg hover:bg-green-600">
+                                        Mark as Complete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="py-4 px-3 text-center text-gray-500">
+                                No annual renewals are due at this time.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+</div>
+{% endblock %}

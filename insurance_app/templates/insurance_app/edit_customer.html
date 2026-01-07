@@ -1,0 +1,143 @@
+{% extends 'insurance_app/base.html' %}
+
+{% block title %}Edit {{ customer.customer_name }}{% endblock %}
+
+{% block page_title %}Edit Customer{% endblock %}
+
+{% block content %}
+    <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-lg mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Edit Customer</h1>
+        <h2 class="text-xl text-gray-600 mb-8 text-center">{{ customer.customer_name }}</h2>
+
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <div>
+                    <label for="id_customer" class="block text-gray-700 font-semibold mb-2">Customer ID</label>
+                    <input type="text" id="id_customer" name="id_customer" value="{{ customer.id_customer }}" 
+                           class="w-full px-4 py-2 border rounded-lg bg-gray-200 text-gray-500" readonly>
+                    <p class="text-xs text-gray-500 mt-1">Customer ID cannot be changed.</p>
+                </div>
+
+                <div>
+                    <label for="customer_name" class="block text-gray-700 font-semibold mb-2">Customer Name</label>
+                    <input type="text" id="customer_name" name="customer_name" value="{{ customer.customer_name }}"
+                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+
+                <div>
+                    <label for="in_charge_person" class="block text-gray-700 font-semibold mb-2">In Charge By</label>
+                    {% with current_in_charge=customer.in_charge_person %}
+                    <select id="in_charge_person" name="in_charge_person" 
+                            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">-- Select Person --</option>
+                        {% for value, name in in_charge_choices %}
+                            <option value="{{ value }}" {% if current_in_charge == value %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" id="in_charge_other" name="in_charge_other" 
+                           value="{% if current_in_charge and current_in_charge not in in_charge_values %}{{ current_in_charge }}{% endif %}"
+                           placeholder="Enter Name" 
+                           class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 {% if not current_in_charge or current_in_charge in in_charge_values %}hidden{% endif %}">
+                    {% endwith %}
+                </div>
+
+                <div>
+                    <label for="proposal_prepared_by" class="block text-gray-700 font-semibold mb-2">Proposal Prepared By</label>
+                    {% with current_proposal=customer.proposal_prepared_by %}
+                    <select id="proposal_prepared_by" name="proposal_prepared_by" 
+                            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">-- Select Person --</option>
+                        {% for value, name in proposal_choices %}
+                            <option value="{{ value }}" {% if current_proposal == value %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" id="proposal_other" name="proposal_other" 
+                           value="{% if current_proposal and current_proposal not in proposal_values %}{{ current_proposal }}{% endif %}"
+                           placeholder="Enter Name" 
+                           class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 {% if not current_proposal or current_proposal in proposal_values %}hidden{% endif %}">
+                    {% endwith %}
+                </div>
+
+                <div>
+                    <label for="engineers" class="block text-gray-700 font-semibold mb-2">Engineers (Hold Ctrl/Cmd to select multiple)</label>
+                    <select id="engineers" name="engineers" multiple
+                            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-32">
+                        {% for value, name in engineer_choices %}
+                            <option value="{{ value }}" {% if value in saved_engineers %}selected{% endif %}>
+                                {{ name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <label for="engineers_other" class="block text-sm font-medium text-gray-700 mt-2">Other Engineers (Optional, comma separated)</label>
+                    <input type="text" id="engineers_other" name="engineers_other" 
+                           value="{{ custom_engineers_str }}"
+                           placeholder="e.g. John Doe, Jane Smith" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label for="installer" class="block text-gray-700 font-semibold mb-2">Installer (Optional)</label>
+                    <input type="text" id="installer" name="installer" value="{{ customer.installer|default:'' }}"
+                           placeholder="Enter Installer Name"
+                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label for="installed_on" class="block text-gray-700 font-semibold mb-2">Installed On</label>
+                    <input type="date" id="installed_on" name="installed_on" value="{{ customer.installed_on|date:'Y-m-d' }}"
+                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label for="address" class="block text-gray-700 font-semibold mb-2">Address(Optional)</label>
+                    <input type="text" id="address" name="address" value="{{ customer.address|default:'' }}"
+                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label for="email" class="block text-gray-700 font-semibold mb-2">Email(Optional)</label>
+                    <input type="email" id="email" name="email" value="{{ customer.email|default:'' }}"
+                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label for="phone_num" class="block text-gray-700 font-semibold mb-2">Phone Number(Optional)</label>
+                    <input type="text" id="phone_num" name="phone_num" value="{{ customer.phone_num|default:'' }}"
+                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div class="flex items-center justify-between mt-8">
+                    <a href="{% url 'customer_detail' customer.id_customer %}" class="text-gray-600 hover:text-gray-800 font-medium">
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                            class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function toggleOtherInput(selectId, inputId) {
+            const selectElement = document.getElementById(selectId);
+            const inputElement = document.getElementById(inputId);
+
+            selectElement.addEventListener('change', function() {
+                if (this.value === 'Other') {
+                    inputElement.classList.remove('hidden');
+                    inputElement.required = true;
+                } else {
+                    inputElement.classList.add('hidden');
+                    inputElement.required = false;
+                }
+            });
+        }
+
+        toggleOtherInput('in_charge_person', 'in_charge_other');
+        toggleOtherInput('proposal_prepared_by', 'proposal_other');
+    });
+</script>
+{% endblock %}

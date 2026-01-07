@@ -1,0 +1,58 @@
+{% extends 'insurance_app/base.html' %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block page_title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-xl p-8 max-w-5xl mx-auto">
+    <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Expired & Expiring Soon</h1>
+
+    {% if items %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600">Status</th>
+                        <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600">Type</th>
+                        <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600">Customer Name</th>
+                        <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600">Customer ID</th>
+                        <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600">Expiration Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="py-3 px-4 border-b">
+                            <span class="h-3 w-3 rounded-full inline-block
+                                {% if item.status_color == 'red' %} bg-red-500
+                                {% elif item.status_color == 'yellow' %} bg-yellow-400
+                                {% else %} bg-gray-400 {% endif %}"
+                                title="{{ item.status_color|capfirst }}"></span>
+                        </td>
+                        <td class="py-3 px-4 border-b font-medium text-gray-700">{{ item.type }}</td>
+                        <td class="py-3 px-4 border-b">
+                            <a href="{% url 'customer_detail' item.customer.id_customer %}" class="text-blue-600 hover:underline">
+                                {{ item.customer.customer_name }}
+                            </a>
+                        </td>
+                        <td class="py-3 px-4 border-b font-mono">{{ item.customer.id_customer }}</td>
+                        <td class="py-3 px-4 border-b font-mono 
+                            {% if item.status_color == 'red' %} text-red-600 font-semibold
+                            {% elif item.status_color == 'yellow' %} text-yellow-600 font-semibold
+                            {% endif %}">
+                            {{ item.end_date|date:"F d, Y" }}
+                        </td>
+                    </tr>
+                    {% endfor %}        
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-10 px-6 bg-green-50 rounded-lg">
+            <h2 class="text-xl font-semibold text-green-800">All Clear!</h2>
+            <p class="text-gray-600 mt-2">There are no items that have expired or are expiring in the next 30 days.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

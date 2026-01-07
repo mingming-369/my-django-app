@@ -1,0 +1,160 @@
+{% extends 'insurance_app/base.html' %}
+
+{% block title %}Add Defect Record{% endblock %}
+
+{% block page_title %}Add New Defect Record{% endblock %}
+
+{% block content %}
+<div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-lg mx-auto">
+    <h2 class="text-3xl font-bold mb-6 text-gray-800 text-center">New Defect Record</h2>
+
+    <form action="{% url 'add_defect_record' %}" method="post" class="space-y-4" id="defectForm">
+        {% csrf_token %}
+
+        <div class="relative">
+            <label for="customer_search" class="block text-sm font-medium text-gray-700">Customer (Type Name or ID)</label>
+            <div class="flex items-center">
+                <input type="text" id="customer_search" list="customer_list" placeholder="Search customer..." 
+                       class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                       autocomplete="off" required>
+
+                <span id="valid_indicator" class="ml-2 text-2xl hidden">✅</span>
+            </div>
+            
+            <datalist id="customer_list">
+                {% for customer in customers %}
+                    <option data-id="{{ customer.id_customer }}" value="{{ customer.customer_name }} ({{ customer.id_customer }})"></option>
+                {% endfor %}
+            </datalist>
+            <input type="hidden" id="id_customer" name="id_customer">
+            <p id="customer_error" class="text-red-500 text-xs mt-1 hidden">Please select a valid customer from the list.</p>
+        </div>
+
+        <div>
+            <label for="defect_type_select" class="block text-sm font-medium text-gray-700">Defect Type</label>
+            <select id="defect_type_select" name="defect_type_select" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                <option value="Lighting Strike">Lighting Strike</option>
+                <option value="Fire Disaster">Fire Disaster</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <div id="other_input_container" class="hidden">
+            <label for="defect_type_other" class="block text-sm font-medium text-gray-700">Please specify "Other"</label>
+            <input type="text" id="defect_type_other" name="defect_type_other" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="report_date" class="block text-sm font-medium text-gray-700">Accident Date</label>
+                <input type="date" id="report_date" name="report_date" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="resolution_deadline" class="block text-sm font-medium text-gray-700">Deadline</label>
+                <input type="date" id="resolution_deadline" name="resolution_deadline" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50">
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end pt-4 space-x-4">
+             <a href="{% url 'defect_list' %}" class="bg-gray-200 text-gray-700 font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-gray-300 transition-colors">Cancel</a>
+            <button type="submit" class="bg-red-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-red-700 transition-colors">Submit</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const reportDateInput = document.getElementById('report_date');
+        const deadlineInput = document.getElementById('resolution_deadline');
+        const DAYS_TO_ADD = 14; 
+
+        const deadlinesRaw = '{{ deadlines_json|escapejs }}';
+        let customerDeadlines = {};
+        if (deadlinesRaw) {
+            try {
+                customerDeadlines = JSON.parse(deadlinesRaw);
+            } catch(e) {
+                console.error("Error parsing deadlines:", e);
+                customerDeadlines = {};
+            }
+        }
+
+        const searchInput = document.getElementById('customer_search');
+        const hiddenInput = document.getElementById('id_customer');
+        const validIndicator = document.getElementById('valid_indicator');
+        const errorMsg = document.getElementById('customer_error');
+        const form = document.getElementById('defectForm');
+        const datalist = document.getElementById('customer_list');
+        
+        const customerMap = {};
+        for (let i = 0; i < datalist.options.length; i++) {
+            const opt = datalist.options[i];
+            customerMap[opt.value] = opt.getAttribute('data-id');
+        }
+
+        function validateSelection() {
+            const val = searchInput.value;
+
+            if (customerMap[val]) {
+                const custId = customerMap[val];
+                hiddenInput.value = custId;
+                validIndicator.classList.remove('hidden');
+                errorMsg.classList.add('hidden');
+                searchInput.setCustomValidity("");
+
+                if (customerDeadlines[custId]) {
+                    deadlineInput.value = customerDeadlines[custId];
+                    deadlineInput.style.backgroundColor = "#d1fae5";
+                    setTimeout(() => deadlineInput.style.backgroundColor = "#f9fafb", 1000);
+                } else {
+                }
+
+            } else {
+                hiddenInput.value = "";
+                validIndicator.classList.add('hidden');
+            }
+        }
+
+        searchInput.addEventListener('input', validateSelection);
+        searchInput.addEventListener('change', validateSelection);
+        reportDateInput.addEventListener('change', function() {
+            const dateVal = this.value;
+            if (dateVal && !deadlineInput.value) {
+                const startDate = new Date(dateVal);
+                const deadlineDate = new Date(startDate);
+                deadlineDate.setDate(startDate.getDate() + DAYS_TO_ADD);
+                
+                const year = deadlineDate.getFullYear();
+                const month = String(deadlineDate.getMonth() + 1).padStart(2, '0');
+                const day = String(deadlineDate.getDate()).padStart(2, '0');
+                
+                deadlineInput.value = `${year}-${month}-${day}`;
+            }
+        });
+
+        const typeSelect = document.getElementById('defect_type_select');
+        const otherContainer = document.getElementById('other_input_container');
+        const otherInput = document.getElementById('defect_type_other');
+
+        typeSelect.addEventListener('change', function() {
+            if (this.value === 'Other') {
+                otherContainer.classList.remove('hidden');
+                otherInput.required = true;
+            } else {
+                otherContainer.classList.add('hidden');
+                otherInput.required = false;
+                otherInput.value = '';
+            }
+        });
+
+        form.addEventListener('submit', function(e) {
+            if (!hiddenInput.value) {
+                e.preventDefault();
+                errorMsg.classList.remove('hidden');
+                searchInput.focus();
+                searchInput.setCustomValidity("Please select a valid customer.");
+            }
+        });
+    });
+</script>
+{% endblock %}

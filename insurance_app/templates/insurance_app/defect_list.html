@@ -1,0 +1,81 @@
+{% extends 'insurance_app/base.html' %}
+
+{% block title %}Defect Records{% endblock %}
+
+{% block page_title %}Defect Records{% endblock %}
+
+{% block content %}
+<div class="container mx-auto">
+    <div class="bg-white p-8 rounded-lg shadow-lg">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Defects List</h2>
+            {% if perms.insurance_app.add_defect %}
+            <a href="{% url 'add_defect_record' %}" class="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition">
+                + Add Defect Record
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="py-2 px-3 border-b text-left text-sm font-semibold text-gray-600">Status</th>
+                        <th class="py-2 px-3 border-b text-left text-sm font-semibold text-gray-600">Customer</th>
+                        <th class="py-2 px-3 border-b text-left text-sm font-semibold text-gray-600">Defect Type</th>
+                        <!-- Removed Description Column -->
+                        <th class="py-2 px-3 border-b text-left text-sm font-semibold text-gray-600">Accident Date</th>
+                        <th class="py-2 px-3 border-b text-left text-sm font-semibold text-gray-600">Deadline</th>
+                        <th class="py-2 px-3 border-b text-center text-sm font-semibold text-gray-600">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for defect in defects %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="py-3 px-3 border-b">
+                            {% if defect.status == 'Solved' %}
+                                <span class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">Solved</span>
+                            {% else %}
+                                <span class="bg-red-100 text-red-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-3 border-b">
+                            <a href="{% url 'customer_detail' defect.id_customer.id_customer %}" class="text-blue-600 hover:underline">
+                                {{ defect.id_customer.customer_name }}
+                            </a>
+                        </td>
+                        <td class="py-3 px-3 border-b font-medium text-gray-800">{{ defect.defect_type }}</td>
+                        <!-- Removed Description Data -->
+                        <td class="py-3 px-3 border-b">{{ defect.accident_date|date:"Y-m-d" }}</td>
+                        <td class="py-3 px-3 border-b">{{ defect.resolution_deadline|date:"Y-m-d" }}</td>
+                        <td class="py-3 px-3 border-b text-center space-x-2">
+                            {% if perms.insurance_app.change_defect %}
+                                <!-- Link to the new edit_defect_record view -->
+                                <a href="{% url 'edit_defect_record' defect.defect_id %}" class="text-blue-500 hover:text-blue-700 text-sm font-semibold">Edit</a>
+                                
+                                {% if defect.status != 'Solved' %}
+                                <form action="{% url 'solve_defect' defect.defect_id %}" method="post" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="text-green-600 hover:text-green-800 text-sm font-semibold" onclick="return confirm('Mark this defect as solved?');">
+                                        Mark Solved
+                                    </button>
+                                </form>
+                                {% endif %}
+                            {% endif %}
+
+                             {% if perms.insurance_app.delete_defect %}
+                                <a href="{% url 'delete_defect_record' defect.defect_id %}" class="text-red-500 hover:text-red-700 text-sm ml-2 font-semibold">Delete</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-4 text-center text-gray-500">No defect records found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

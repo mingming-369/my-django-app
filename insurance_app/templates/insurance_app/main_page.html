@@ -1,0 +1,88 @@
+{% extends 'insurance_app/base.html' %}
+
+{% block title %}Dashboard - Insurance Management{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mx-auto">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-lg shadow-lg flex items-center">
+            <div class="bg-blue-500 text-white rounded-full p-3 mr-4">
+                <ion-icon name="shield-checkmark-outline" class="h-8 w-8"></ion-icon>
+            </div>
+            <div>
+                <p class="text-gray-500 text-sm">Active Insurances</p>
+                <p class="text-2xl font-bold text-gray-800">{{ active_policies_count }}</p>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg flex items-center">
+            <div class="bg-amber-500 text-white rounded-full p-3 mr-4">
+                 <ion-icon name="warning-outline" class="h-8 w-8"></ion-icon>
+            </div>
+            <div>
+                <p class="text-gray-500 text-sm">Expiring Soon</p>
+                <p class="text-2xl font-bold text-gray-800">{{ expiring_items_count }}</p>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg flex items-center">
+            <div class="bg-red-500 text-white rounded-full p-3 mr-4">
+                 <ion-icon name="close-circle-outline" class="h-8 w-8"></ion-icon>
+            </div>
+            <div>
+                <p class="text-gray-500 text-sm">Expired</p>
+                <p class="text-2xl font-bold text-gray-800">{{ total_expired_count }}</p>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg flex items-center">
+            <div class="bg-green-500 text-white rounded-full p-3 mr-4">
+                <ion-icon name="people-circle-outline" class="h-8 w-8"></ion-icon>
+            </div>
+            <div>
+                <p class="text-gray-500 text-sm">Total Customers</p>
+                <p class="text-2xl font-bold text-gray-800">{{ total_customers_count }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <h3 class="text-xl font-semibold text-gray-700 mb-4">Quick Actions</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            {% if perms.insurance_app.add_customer %}
+            <a href="{% url 'add_customer' %}" 
+               class="flex flex-col items-center justify-center bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                <ion-icon name="person-add-outline" class="h-12 w-12 text-blue-600 mb-2"></ion-icon>
+                <span class="font-semibold text-gray-700">Add Customer</span>
+            </a>
+            {% endif %}
+            
+            {% if perms.insurance_app.add_insurance %}
+            <a href="{% url 'add_insurance' %}" 
+               class="flex flex-col items-center justify-center bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                <ion-icon name="document-text-outline" class="h-12 w-12 text-green-600 mb-2"></ion-icon>
+                <span class="font-semibold text-gray-700">Add Insurance</span>
+            </a>
+            {% endif %}
+
+            {% if perms.insurance_app.view_customer %}
+            <a href="{% url 'customer_list' %}" 
+               class="flex flex-col items-center justify-center bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                <ion-icon name="search-outline" class="h-12 w-12 text-gray-700 mb-2"></ion-icon>
+                <span class="font-semibold text-gray-700">Search Customers</span>
+            </a>
+            {% endif %}
+
+            <a href="{% url 'notification_page' %}" 
+               class="flex flex-col items-center justify-center bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                 <ion-icon name="notifications-circle-outline" class="h-12 w-12 text-amber-600 mb-2"></ion-icon>
+                <span class="font-semibold text-gray-700">View Notifications</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    
+    <title>{% block title %}Insurance Management{% endblock %}</title>
+</head>
+<body class="bg-gray-100 flex">
+
+    <aside class="w-64 min-h-screen bg-gray-800 text-white flex flex-col fixed">
+        <div class="p-6 flex justify-center">
+            <a href="{% url 'main_page' %}">
+                <img src="{% static 'images/blogo.png' %}" alt="Logo" class="h-28 w-auto object-contain">
+            </a>
+        </div>
+        
+        <nav class="flex-1 px-4 py-2 space-y-2">
+            <ul>
+                <li class="mb-2">
+                    <a href="{% url 'main_page' %}" class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-700">
+                        <ion-icon name="speedometer-outline" class="h-6 w-6"></ion-icon>
+                        <span class="ml-3">Dashboard</span>
+                    </a>
+                </li>
+                
+                {% if perms.insurance_app.view_customer %}
+                <li class="mb-2">
+                    <a href="{% url 'customer_list' %}" class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-700">
+                        <ion-icon name="people-outline" class="h-6 w-6"></ion-icon>
+                        <span class="ml-3">Customers</span>
+                    </a>
+                </li>
+                {% endif %} 
+
+                <li class="mb-2">
+                    <a href="{% url 'defect_list' %}" class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-700">
+                        <ion-icon name="hammer-outline" class="h-6 w-6"></ion-icon>
+                        <span class="ml-3">Defect Records</span>
+                    </a>
+                </li>
+                
+                <li class="mb-2">
+                    <a href="{% url 'notification_page' %}" class="flex items-center justify-between p-3 text-gray-300 rounded-lg hover:bg-gray-700">
+                        <div class="flex items-center">
+                            <ion-icon name="notifications-outline" class="h-6 w-6"></ion-icon>
+                            <span class="ml-3">Notifications</span>
+                        </div>
+                        {% if expiring_items_count > 0 %}
+                            <span class="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                {{ expiring_items_count }}
+                            </span>
+                        {% endif %}
+                    </a>
+                </li>
+
+                {% if perms.insurance_app.change_insurance %}
+                <li class="mb-2">
+                    <a href="{% url 'renewal_notices_page' %}" class="flex items-center justify-between p-3 text-gray-300 rounded-lg hover:bg-gray-700">
+                        <div class="flex items-center">
+                            <ion-icon name="sync-circle-outline" class="h-6 w-6"></ion-icon>
+                            <span class="ml-3">Renewals</span>
+                        </div>
+                        {% if pending_renewal_count > 0 %}
+                            <span class="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                {{ pending_renewal_count }}
+                            </span>
+                        {% endif %}
+                    </a>
+                </li>
+                {% endif %}
+
+            </ul>
+        </nav>
+        
+        <div class="p-4 mt-auto border-t border-gray-700">
+             <p class="text-sm text-gray-400">Welcome, {{ user.username }}!</p>
+             
+             <form action="{% url 'logout' %}" method="POST" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="text-sm text-red-400 hover:text-red-300 bg-transparent border-none p-0 cursor-pointer">
+                    Logout
+                </button>
+             </form>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-10 ml-64">
+        
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">
+                {% block page_title %}Dashboard{% endblock %}
+            </h1>
+        </div>
+        
+        {% if messages %}
+            <div class="mb-6">
+                {% for message in messages %}
+                    <div class="{% if message.tags == 'success' %} bg-green-100 border-green-400 text-green-700 {% elif message.tags == 'error' %} bg-red-100 border-red-400 text-red-700 {% else %} bg-blue-100 border-blue-400 text-blue-700 {% endif %} border-l-4 p-4 rounded-lg shadow-md" role="alert">
+                        <p class="font-bold">{% if message.tags == 'success' %}Success{% elif message.tags == 'error' %}Error{% else %}Info{% endif %}</p>
+                        <p>{{ message }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="container mx-auto">
+            {% block content %}
+            {% endblock %}
+        </div>
+        
+    </main>
+</body>
+</html>

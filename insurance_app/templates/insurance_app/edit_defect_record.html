@@ -1,0 +1,66 @@
+{% extends 'insurance_app/base.html' %}
+
+{% block title %}Edit Defect Record{% endblock %}
+
+{% block page_title %}Edit Defect Record{% endblock %}
+
+{% block content %}
+<div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-lg mx-auto">
+    <h2 class="text-3xl font-bold mb-6 text-gray-800 text-center">Edit Defect Record</h2>
+    <p class="text-gray-600 mb-6 text-center">For Customer: <strong>{{ defect.id_customer.customer_name }}</strong></p>
+
+    <form method="post" class="space-y-4" id="defectForm">
+        {% csrf_token %}
+
+        <div>
+            <label for="defect_type_select" class="block text-sm font-medium text-gray-700">Defect Type</label>
+            <select id="defect_type_select" name="defect_type_select" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                <option value="Lighting Strike" {% if defect.defect_type == 'Lighting Strike' %}selected{% endif %}>Lighting Strike</option>
+                <option value="Fire Disaster" {% if defect.defect_type == 'Fire Disaster' %}selected{% endif %}>Fire Disaster</option>
+                <option value="Other" {% if defect.defect_type != 'Lighting Strike' and defect.defect_type != 'Fire Disaster' %}selected{% endif %}>Other</option>
+            </select>
+        </div>
+
+        <div id="other_input_container" class="{% if defect.defect_type == 'Lighting Strike' or defect.defect_type == 'Fire Disaster' %}hidden{% endif %}">
+            <label for="defect_type_other" class="block text-sm font-medium text-gray-700">Please specify "Other"</label>
+            <input type="text" id="defect_type_other" name="defect_type_other" 
+                   value="{% if defect.defect_type != 'Lighting Strike' and defect.defect_type != 'Fire Disaster' %}{{ defect.defect_type }}{% endif %}"
+                   class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="report_date" class="block text-sm font-medium text-gray-700">Accident Date</label>
+                <input type="date" id="report_date" name="report_date" value="{{ defect.accident_date|date:'Y-m-d' }}" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="resolution_deadline" class="block text-sm font-medium text-gray-700">Deadline</label>
+                <input type="date" id="resolution_deadline" name="resolution_deadline" value="{{ defect.resolution_deadline|date:'Y-m-d' }}" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50">
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end pt-4 space-x-4">
+             <a href="{% url 'defect_list' %}" class="bg-gray-200 text-gray-700 font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-gray-300 transition-colors">Cancel</a>
+            <button type="submit" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-blue-700 transition-colors">Save Changes</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeSelect = document.getElementById('defect_type_select');
+        const otherContainer = document.getElementById('other_input_container');
+        const otherInput = document.getElementById('defect_type_other');
+
+        typeSelect.addEventListener('change', function() {
+            if (this.value === 'Other') {
+                otherContainer.classList.remove('hidden');
+                otherInput.required = true;
+            } else {
+                otherContainer.classList.add('hidden');
+                otherInput.required = false;
+            }
+        });
+    });
+</script>
+{% endblock %}

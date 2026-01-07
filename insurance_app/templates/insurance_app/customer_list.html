@@ -1,0 +1,124 @@
+{% extends 'insurance_app/base.html' %}
+
+{% block title %}Search Customers{% endblock %}
+
+{% block page_title %}Customers List{% endblock %}
+
+{% block content %}
+<div class="bg-white p-8 rounded-lg shadow-lg">
+    
+    <form method="get" action="{% url 'customer_list' %}" class="flex flex-wrap items-center justify-center gap-4 mb-8 bg-gray-50 p-4 rounded-lg">
+        <select name="search_field" class="border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="all" {% if search_field == 'all' %}selected{% endif %}>All</option>
+            <option value="name" {% if search_field == 'name' %}selected{% endif %}>Name</option>
+            <option value="id" {% if search_field == 'id' %}selected{% endif %}>Customer ID</option>
+            <option value="email" {% if search_field == 'email' %}selected{% endif %}>Email</option>
+            <option value="address" {% if search_field == 'address' %}selected{% endif %}>Address</option>
+            <option value="phone" {% if search_field == 'phone' %}selected{% endif %}>Phone</option>
+        </select>
+        <input type="text" name="query" value="{{ query|default:'' }}" placeholder="Enter search term..." class="flex-grow border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 min-w-0">
+        <button type="submit" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-blue-700 transition">Search</button>
+    </form>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600">Status (I/W/D)</th>
+                    
+                    <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                        <a href="?sort_by={% if current_sort == 'id_customer' %}-id_customer{% else %}id_customer{% endif %}&query={{ query|urlencode }}&search_field={{ search_field }}" class="hover:text-blue-600">
+                            Customer ID {% if 'id_customer' in current_sort %}{% if current_sort|first == '-' %}&darr;{% else %}&uarr;{% endif %}{% endif %}
+                        </a>
+                    </th>
+                    <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                        <a href="?sort_by={% if current_sort == 'customer_name' %}-customer_name{% else %}customer_name{% endif %}&query={{ query|urlencode }}&search_field={{ search_field }}" class="hover:text-blue-600">
+                            Name {% if 'customer_name' in current_sort %}{% if current_sort|first == '-' %}&darr;{% else %}&uarr;{% endif %}{% endif %}
+                        </a>
+                    </th>
+                    <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                         <a href="?sort_by={% if current_sort == 'email' %}-email{% else %}email{% endif %}&query={{ query|urlencode }}&search_field={{ search_field }}" class="hover:text-blue-600">
+                            Email {% if 'email' in current_sort %}{% if current_sort|first == '-' %}&darr;{% else %}&uarr;{% endif %}{% endif %}
+                        </a>
+                    </th>
+                    <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600">
+                         <a href="?sort_by={% if current_sort == 'phone_num' %}-phone_num{% else %}phone_num{% endif %}&query={{ query|urlencode }}&search_field={{ search_field }}" class="hover:text-blue-600">
+                            Phone {% if 'phone_num' in current_sort %}{% if current_sort|first == '-' %}&darr;{% else %}&uarr;{% endif %}{% endif %}
+                        </a>
+                    </th>
+                    <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in page_obj %}
+                <tr class="hover:bg-gray-50">
+                    <td class="py-3 px-4 border-b">
+                        <div class="flex items-center space-x-1">
+                            <span class="h-3 w-3 rounded-full inline-block
+                                {% if customer.insurance_status.color == 'red' %} bg-red-500
+                                {% elif customer.insurance_status.color == 'yellow' %} bg-yellow-400
+                                {% elif customer.insurance_status.color == 'green' %} bg-green-500
+                                {% else %} bg-gray-400 {% endif %}"
+                                title="Insurances: {{ customer.insurance_status.total }} total ({{ customer.insurance_status.green }} Active, {{ customer.insurance_status.yellow }} Expiring, {{ customer.insurance_status.red }} Expired)">
+                            </span>
+                            <span class="h-3 w-3 rounded-full inline-block
+                                {% if customer.warranty_status.color == 'red' %} bg-red-500
+                                {% elif customer.warranty_status.color == 'yellow' %} bg-yellow-400
+                                {% elif customer.warranty_status.color == 'green' %} bg-green-500
+                                {% else %} bg-gray-400 {% endif %}"
+                                title="Warranties: {{ customer.warranty_status.total }} total ({{ customer.warranty_status.green }} Active, {{ customer.warranty_status.yellow }} Expiring, {{ customer.warranty_status.red }} Expired)">
+                            </span>
+                            <span class="h-3 w-3 rounded-full inline-block
+                                {% if customer.defect_status.color == 'red' %} bg-red-500
+                                {% elif customer.defect_status.color == 'yellow' %} bg-yellow-400
+                                {% elif customer.defect_status.color == 'green' %} bg-green-500
+                                {% else %} bg-gray-400 {% endif %}"
+                                title="Defects: {{ customer.defect_status.total }} total ({{ customer.defect_status.green }} Active, {{ customer.defect_status.yellow }} Expiring, {{ customer.defect_status.red }} Expired)">
+                            </span>
+                        </div>
+                    </td>
+
+                    <td class="py-3 px-4 border-b font-mono">{{ customer.id_customer }}</td>
+        
+                    <td class="py-3 px-4 border-b font-medium text-gray-900">{{ customer.customer_name }}</td>
+        
+                    <td class="py-3 px-4 border-b">{{ customer.email|default:"N/A" }}</td>
+        
+                    <td class="py-3 px-4 border-b">{{ customer.phone_num|default:"N/A" }}</td>
+        
+                    <td class="py-3 px-4 border-b">
+                        {% if perms.insurance_app.view_customer %}
+                            <a href="{% url 'customer_detail' customer.id_customer %}" class="text-blue-600 hover:underline font-semibold">View Details</a>
+                        {% endif %}
+                    </td>
+
+                </tr> {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-10 text-gray-500">
+                        No customers found matching your criteria.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if is_paginated %}
+        <div class="flex items-center justify-center space-x-2 mt-8">
+            {% if page_obj.has_previous %}
+                <a href="?page=1&query={{ query|urlencode }}&search_field={{ search_field }}&sort_by={{ current_sort }}" class="px-3 py-1 border rounded hover:bg-gray-100 text-gray-600">&laquo; First</a>
+                <a href="?page={{ page_obj.previous_page_number }}&query={{ query|urlencode }}&search_field={{ search_field }}&sort_by={{ current_sort }}" class="px-3 py-1 border rounded hover:bg-gray-100 text-gray-600">Previous</a>
+            {% endif %}
+
+            <span class="px-3 py-1 text-gray-600">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&query={{ query|urlencode }}&search_field={{ search_field }}&sort_by={{ current_sort }}" class="px-3 py-1 border rounded hover:bg-gray-100 text-gray-600">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}&query={{ query|urlencode }}&search_field={{ search_field }}&sort_by={{ current_sort }}" class="px-3 py-1 border rounded hover:bg-gray-100 text-gray-600">Last &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
